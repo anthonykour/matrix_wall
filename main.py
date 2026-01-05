@@ -1,21 +1,14 @@
-import sys, os
+import sys
+import os
+import random
+import pygame
 
-# Check for Android
-andr = None
+# Check for Android (optional; harmless if not present)
 try:
-    import android
+    import android  # type: ignore
     andr = True
 except ImportError:
     andr = False
-
-# Try importing needed modules
-try:
-    import sys
-    import random
-    import pygame
-except ImportError as e:
-    print("Import failed:", e)
-    sys.exit(1)
 
 # Initialize Pygame
 pygame.init()
@@ -23,11 +16,11 @@ pygame.init()
 # Font setup (use default if monospace fails)
 font_size = 20
 try:
-    font = pygame.font.SysFont('monospace', font_size, bold=True)
-except:
+    font = pygame.font.SysFont("monospace", font_size, bold=True)
+except Exception:
     font = pygame.font.Font(None, font_size)
 
-# Set fixed window size (Android fullscreen workaround)
+# Initial window size (Pydroid/Android)
 info = pygame.display.Info()
 width, height = info.current_w, info.current_h
 screen = pygame.display.set_mode((width, height), pygame.NOFRAME)
@@ -37,7 +30,7 @@ pygame.display.set_caption("Matrix Code Rain")
 chars = list("アイウエオカキクケコサシスセソABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
 # Calculate columns
-columns = width // font_size
+columns = max(1, width // font_size)
 
 # Drops and speeds
 drops = [random.randint(-20, 0) for _ in range(columns)]
@@ -59,6 +52,23 @@ clock = pygame.time.Clock()
 # Main loop
 running = True
 while running:
+    # --- rotation / resize detection (Pydroid-friendly) ---
+    new_info = pygame.display.Info()
+    new_w, new_h = new_info.current_w, new_info.current_h
+
+    if (new_w, new_h) != (width, height):
+        width, height = new_w, new_h
+        screen = pygame.display.set_mode((width, height), pygame.NOFRAME)
+
+        columns = max(1, width // font_size)
+        drops = [random.randint(-20, 0) for _ in range(columns)]
+        speeds = [random.uniform(0.5, 1.5) for _ in range(columns)]
+
+        overlay = pygame.Surface((width, height))
+        overlay.set_alpha(25)
+        overlay.fill(black)
+    # --- end detection ---
+
     screen.blit(overlay, (0, 0))
 
     for i in range(columns):
