@@ -68,7 +68,6 @@ while running:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             running = False
 
-        # ✅ Correct resize handling for pygame 2.6 on Wayland
         if event.type == pygame.WINDOWRESIZED:
             width, height = event.x, event.y
             columns, drops, speeds, overlay = rebuild_state(width, height)
